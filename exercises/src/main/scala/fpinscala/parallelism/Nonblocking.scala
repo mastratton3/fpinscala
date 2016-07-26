@@ -131,14 +131,18 @@ object Nonblocking {
           }
       }
 
+    /** Blocking is implemented in Par.scala */
     def choiceN[A](p: Par[Int])(ps: List[Par[A]]): Par[A] = ???
 
+    /** Blocking is implemented in Par.scala */
     def choiceViaChoiceN[A](a: Par[Boolean])(ifTrue: Par[A], ifFalse: Par[A]): Par[A] =
       ???
 
+    /** Blocking is implemented in Par.scala */
     def choiceMap[K,V](p: Par[K])(ps: Map[K,Par[V]]): Par[V] =
       ???
 
+    /** Blocking version is implemented */
     // see `Nonblocking.scala` answers file. This function is usually called something else!
     def chooser[A,B](p: Par[A])(f: A => Par[B]): Par[B] =
       ???
@@ -152,6 +156,7 @@ object Nonblocking {
     def choiceNChooser[A](p: Par[Int])(choices: List[Par[A]]): Par[A] =
       ???
 
+    /** Blocking version implemented */
     def join[A](p: Par[Par[A]]): Par[A] =
       ???
 

@@ -72,10 +72,6 @@ object Par {
       map(p)(x => (run(es)(x)).get)(es)
   }
 
-  def flatMapViaJoin[A,B](p: Par[A])(f: A => Par[B]): Par[B] = {
-    es =>
-      map(p)(x => join(f(x)) )
-  }
 
   /* Gives us infix syntax for `Par`. */
   implicit def toParOps[A](p: Par[A]): ParOps[A] = new ParOps(p)

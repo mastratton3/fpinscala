@@ -35,7 +35,7 @@ object Prop {
   type FailedCase = String
   type TestCases = Int
 
-  /** Need to go implement more code in laziness
+  /** Need to go implement more code in laziness */
   def forAll[A](gen: Gen[A])(f: A => Boolean): Prop = Prop {
     (n, rng) =>
     randomStream(gen)(rng).zip(Stream.from(0)).take(n).map {
@@ -54,7 +54,7 @@ object Prop {
     s"generated an exception: ${e.getMessage}\n" +
     s"stack trace:\n ${e.getStackTrace.mkString("\n")}"
   }
-  */
+  
 
   sealed trait Result {
     def isFalsified: Boolean

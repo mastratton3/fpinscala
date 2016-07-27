@@ -69,5 +69,10 @@ object Stream {
   val ones: Stream[Int] = Stream.cons(1, ones)
   def from(n: Int): Stream[Int] = cons(n, from(n+1))
 
-  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = sys.error("todo")
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = {
+    f(z) match {
+      case Some((a,s)) => cons(a, unfold(s)(f))
+      case _ => empty
+    }
+  }
 }

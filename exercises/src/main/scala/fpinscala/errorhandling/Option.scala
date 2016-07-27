@@ -1,5 +1,6 @@
 package fpinscala.errorhandling
 
+import scala.annotation.tailrec
 
 import scala.{Option => _, Some => _, Either => _, _} // hide std library `Option`, `Some` and `Either`, since we are writing our own in this chapter
 
@@ -60,7 +61,34 @@ object Option {
     case _ => None
   }
 
-  def sequence[A](a: List[Option[A]]): Option[List[A]] = sys.error("todo")
+  /** Could implement using a fold left */
+  /*
+  def sequence[A](a: List[Option[A]]): Option[List[A]] = {
+    @annotation.tailrec
+    def go(rem: List[Option[A]], acc: Option[List[A]]): Option[List[A]] = rem match {
+      case Nil => acc
+      case h :: t => {
+        h match {
+          case Some(_) => go(t, map2(h, acc)(_ :: _))
+          case None => None
+        }
+      }
+    }
+    go(a, Some(List())).map(_.reverse)
+  }
+  */
+
+  // Not compiling but it should work
+  def sequence[A](a: List[Option[A]]): Option[List[A]] = {
+    a.foldLeft(Some(List()): Option[List[A]]){
+      case (acc, h) =>
+      h match {
+        case Some(_) => map2(h, acc)(_ :: _)
+        case None => None
+      }
+    }.map(_.reverse)
+  }
+
 
   def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = sys.error("todo")
 }

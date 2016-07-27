@@ -73,21 +73,40 @@ object RNG {
       (i :: xs, r2)
     }
   }
-
+    
+  /** Whew fixed bug that was causing issue with sequence */
   def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = {
     rng =>
     val (l, r1) = ra(rng)
-    val (r, r2) = rb(rng)
+    val (r, r2) = rb(r1)
     (f(l,r), r2)
   }
 
+  /** Do fold left impl later
   def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = ???
-
-  def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] = ???
+    */
+    /*Replace later w/ fold left 
+     * Numbers come out the same, doesn't pass RNG to the next, is this normal?
+     * Something seems wrong with this, but it matches what the answer returns
+     */
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = {
+    def go(rem: List[Rand[A]], acc: Rand[List[A]]): Rand[List[A]] = rem match {
+      case Nil => acc 
+      case h :: t => go(t, map2(h, acc){ (x, xs) => x :: xs})
+    }
+    go(fs, unit(List(): List[A]))
+  }
+  
+  
+  def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] = {
+    rng =>
+      val (v, r) = f(rng)
+      g(v)(r)
+  }
 }
 
 case class State[S,+A](run: S => (A, S)) {
-  def map[B](f: A => B): State[S, B] =
+  def map[B](f: A => B): State[S, B] = 
     sys.error("todo")
   def map2[B,C](sb: State[S, B])(f: (A, B) => C): State[S, C] =
     sys.error("todo")

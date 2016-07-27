@@ -35,6 +35,14 @@ object RNG {
     if(nextNum < 0) (-(nextNum + 1), nextRNG) else (nextNum, nextRNG)
   }
 
+  def nonNegativeLessThan(n: Int): Rand[Int] = {
+    flatMap(nonNegativeInt) {
+      i =>
+      val mod = i % n
+      if(i + (n-1) - mod >= 0) unit(mod) else nonNegativeLessThan(n)
+    }
+  }
+
   /* Old Impl
   def double(rng: RNG): (Double, RNG) = {
     val (nextNum, nextRNG) = nonNegativeInt(rng)
@@ -105,13 +113,34 @@ object RNG {
   }
 }
 
+import State._
+
 case class State[S,+A](run: S => (A, S)) {
-  def map[B](f: A => B): State[S, B] = 
-    sys.error("todo")
-  def map2[B,C](sb: State[S, B])(f: (A, B) => C): State[S, C] =
-    sys.error("todo")
-  def flatMap[B](f: A => State[S, B]): State[S, B] =
-    sys.error("todo")
+
+  /* Original
+  def map[B](f: A => B): State[S, B] = State {
+    (s: S) =>
+    val (a, s1) = run(s)
+    (f(a), s)
+  }
+  */
+  def map[B](f: A => B): State[S, B] = flatMap(a => unit(f(a)))
+
+  def map2[B,C](sb: State[S, B])(f: (A, B) => C): State[S, C] = State {
+    (s: S) =>
+    val (a, s1) = run(s)
+    val (b, s2) = sb.run(s1)
+    (f(a,b), s2)
+  }
+
+  def flatMap[B](f: A => State[S, B]): State[S, B] = State {
+    s =>
+    val (a, s1) = run(s)
+    f(a).run(s1)
+  }
+
+
+
 }
 
 sealed trait Input
@@ -123,4 +152,29 @@ case class Machine(locked: Boolean, candies: Int, coins: Int)
 object State {
   type Rand[A] = State[RNG, A]
   def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = ???
+
+  def unit[S, A](a: A): State[S, A] = 
+    State ( s => (a, s) )
+
+  /** Copied from answers, will replace later */
+  def sequence[S, A](sas: List[State[S, A]]): State[S, List[A]] = {
+    def go(s: S, actions: List[State[S,A]], acc: List[A]): (List[A],S) =
+      actions match {
+        case Nil => (acc.reverse,s)
+        case h :: t => h.run(s) match { case (a,s2) => go(s2, t, a :: acc) }
+      }
+    State((s: S) => go(s,sas,List()))
+  }
+
+    /*
+  def modify[S](f: S => S): State[S, Unit] = for {
+    s <- get
+    _ <- set(f(s))
+  } yield ()
+
+  def get[S]: State[S, S] = State(s => (s,s))
+
+  def set[S](s: S): State[S, Unit] = State(_ => ((), s))
+  */
+
 }

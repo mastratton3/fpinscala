@@ -23,6 +23,23 @@ trait Stream[+A] {
     case _ => empty
   }
 
+  /* Stolen from answers to get testing to work */
+  /*
+  The above solution will stack overflow for large streams, since it's
+  not tail-recursive. Here is a tail-recursive implementation. At each
+  step we cons onto the front of the `acc` list, which will result in the
+  reverse of the stream. Then at the end we reverse the result to get the
+  correct order again.
+  */
+  def toList: List[A] = {
+    @annotation.tailrec
+    def go(s: Stream[A], acc: List[A]): List[A] = s match {
+      case Cons(h,t) => go(t(), h() :: acc)
+      case _ => acc
+    }
+    go(this, List()).reverse
+  }
+
   def drop(n: Int): Stream[A] = this match {
     case Cons(_, t) if n > 1 => t().drop(n-1)
     case Cons(_, t) if n == 1 => t()

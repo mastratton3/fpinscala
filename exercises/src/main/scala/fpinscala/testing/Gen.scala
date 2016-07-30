@@ -184,6 +184,10 @@ object Gen {
     SGen(n => g.listOf(n max 1))
   }
 
+  def listOf3[A](g: Gen[A]): SGen[List[A]] = {
+    SGen(n => g.listOf(3))
+  }
+
   def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] = boolean.flatMap{
     x =>
     if(x) g1
